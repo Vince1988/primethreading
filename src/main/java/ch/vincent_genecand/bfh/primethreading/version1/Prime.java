@@ -9,7 +9,7 @@ public class Prime extends Thread {
     private final List<Long> primeNumbers;
     private final long limit;
 
-    private PrimeState state;
+    private PrimeState primeState;
 
     public Prime(String name) {
         this(name, Long.MAX_VALUE);
@@ -27,7 +27,7 @@ public class Prime extends Thread {
         super(threadGroup, name);
         this.primeNumbers = new ArrayList<>();
         this.limit = limit;
-        this.state = PrimeState.STOPPED;
+        this.primeState = PrimeState.STOPPED;
     }
 
     public long getHighestPrimeNumber() {
@@ -35,19 +35,19 @@ public class Prime extends Thread {
     }
 
     private void calculatePrimeNumbers() {
-        for (long i = 2; i < this.limit && this.state != PrimeState.STOPPED; i++) {
+        for (long i = 2; i < this.limit && this.primeState != PrimeState.STOPPED; i++) {
             if (this.isNextPrimeNumber(i)) {
                 this.primeNumbers.add(i);
             }
             this.sleep();
         }
 
-        this.state = PrimeState.STOPPED;
+        this.primeState = PrimeState.STOPPED;
     }
 
     private void sleep() {
-        if (this.state == PrimeState.RUNNING) {
-            this.state = PrimeState.SLEEPING;
+        if (this.primeState == PrimeState.RUNNING) {
+            this.primeState = PrimeState.SLEEPING;
         }
         try {
             Thread.sleep(new Random().nextInt(1001));
@@ -55,8 +55,8 @@ public class Prime extends Thread {
             // TODO Auto-generated catch block
             e.printStackTrace();
         }
-        if (this.state == PrimeState.SLEEPING) {
-            this.state = PrimeState.RUNNING;
+        if (this.primeState == PrimeState.SLEEPING) {
+            this.primeState = PrimeState.RUNNING;
         }
     }
 
@@ -71,7 +71,7 @@ public class Prime extends Thread {
 
     @Override
     public void run() {
-        this.state = PrimeState.RUNNING;
+        this.primeState = PrimeState.RUNNING;
         this.calculatePrimeNumbers();
     }
 
@@ -93,16 +93,16 @@ public class Prime extends Thread {
 
     @Override
     public String toString() {
-        return " | " + this.getName() + ": " + this.getHighestPrimeNumber() + " (" + this.state + ") | ";
+        return " | " + this.getName() + ": " + this.getHighestPrimeNumber() + " (" + this.primeState + ") | ";
     }
 
     @Override
     public void interrupt() {
-        this.state = PrimeState.STOPPED;
+        this.primeState = PrimeState.STOPPED;
     }
 
-    private enum PrimeState {
-        RUNNING, SLEEPING, STOPPED;
+    public PrimeState getPrimeState() {
+        return this.primeState;
     }
 
 }
