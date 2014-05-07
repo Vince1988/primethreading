@@ -1,12 +1,11 @@
 package ch.vincent_genecand.bfh.primethreading.version1;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Random;
+import java.util.Stack;
 
 public class Prime extends Thread {
 
-    private final List<Long> primeNumbers;
+    private final Stack<Long> primeNumbers;
     private final long limit;
 
     private PrimeState primeState;
@@ -25,13 +24,13 @@ public class Prime extends Thread {
 
     public Prime(ThreadGroup threadGroup, String name, long limit) {
         super(threadGroup, name);
-        this.primeNumbers = new ArrayList<>();
+        this.primeNumbers = new Stack<>();
         this.limit = limit;
         this.primeState = PrimeState.STOPPED;
     }
 
     public long getHighestPrimeNumber() {
-        return this.primeNumbers.size() > 0 ? this.primeNumbers.get(this.primeNumbers.size() - 1) : 0;
+        return this.primeNumbers.isEmpty() ? 0 : this.primeNumbers.lastElement();
     }
 
     private void calculatePrimeNumbers() {
@@ -39,29 +38,39 @@ public class Prime extends Thread {
             if (this.isNextPrimeNumber(i)) {
                 this.primeNumbers.add(i);
             }
-            this.sleep();
         }
 
         this.primeState = PrimeState.STOPPED;
     }
 
     private void sleep() {
-        if (this.primeState == PrimeState.RUNNING) {
-            this.primeState = PrimeState.SLEEPING;
-        }
         try {
+            this.toggle();
             Thread.sleep(new Random().nextInt(1001));
+            this.toggle();
         } catch (InterruptedException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
         }
-        if (this.primeState == PrimeState.SLEEPING) {
+    }
+
+    private void toggle() throws InterruptedException {
+        switch (this.primeState) {
+        case RUNNING:
+            this.primeState = PrimeState.SLEEPING;
+            break;
+        case SLEEPING:
             this.primeState = PrimeState.RUNNING;
+            Thread.sleep(100);
+            break;
+        default:
+            break;
         }
     }
 
     private boolean isNextPrimeNumber(long number) {
         for (long primeNumber : this.primeNumbers) {
+            this.sleep();
             if (number % primeNumber == 0) {
                 return false;
             }
@@ -93,7 +102,7 @@ public class Prime extends Thread {
 
     @Override
     public String toString() {
-        return " | " + this.getName() + ": " + this.getHighestPrimeNumber() + " (" + this.primeState + ") | ";
+        return this.getName();
     }
 
     @Override

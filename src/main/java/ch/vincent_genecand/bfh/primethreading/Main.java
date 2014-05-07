@@ -25,26 +25,19 @@ final class Main {
         this.initLamps();
 
         while (true) {
-            this.updateLamps();
             this.panel.repaint();
-        }
-    }
-
-    private void updateLamps() {
-        for (Prime prime : this.primes) {
-            this.panel.updateLamp(prime.getName(), prime.getPrimeState());
         }
     }
 
     private void initLamps() {
         for (Prime prime : this.primes) {
-            this.panel.addLamp(prime.getName());
+            this.panel.addLamp(prime);
         }
     }
 
     private void initPrimes() {
         for (int i = 0; i < 5; i++) {
-            this.primes.add(new Prime(this.threadGroup, "#" + i, 10));
+            this.primes.add(new Prime(this.threadGroup, "#" + i, 100));
         }
     }
 
@@ -56,29 +49,5 @@ final class Main {
 
     public static void main(String[] args) {
         new Main();
-        // List<Prime> primes = new ArrayList<>();
-        // ThreadGroup tg = new ThreadGroup("Unlimited Prime Generators");
-        // Prime prime = new Prime("Limited Prime Generator", 25);
-        //
-        // while (prime.isAlive()) {
-        // try {
-        // System.out.print(prime);
-        // for (Prime t : primes) {
-        // System.out.print(t);
-        // }
-        // System.out.println();
-        //
-        // Thread.sleep(1000);
-        // } catch (InterruptedException e) {
-        // // TODO Auto-generated catch block
-        // e.printStackTrace();
-        // }
-        // }
-        // tg.interrupt();
-        //
-        // System.out.print(prime);
-        // for (Prime t : primes) {
-        // System.out.print(t);
-        // }
     }
 }
