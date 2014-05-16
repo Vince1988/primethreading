@@ -1,5 +1,7 @@
 package ch.vincent_genecand.bfh.primethreading.gui;
 
+import java.awt.Color;
+
 import javax.swing.JFrame;
 
 public class ControlWindow extends JFrame {
@@ -12,6 +14,8 @@ public class ControlWindow extends JFrame {
         this.setTitle(TITLE);
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         this.setResizable(false);
+        this.setUndecorated(true);
+        this.setBackground(new Color(0, 0, 0, 0));
 
         this.setContentPane(controlPanel);
 

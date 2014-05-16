@@ -1,53 +1,39 @@
 package ch.vincent_genecand.bfh.primethreading;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import ch.vincent_genecand.bfh.primethreading.gui.ControlPanel;
-import ch.vincent_genecand.bfh.primethreading.gui.ControlWindow;
-import ch.vincent_genecand.bfh.primethreading.version1.Prime;
+import ch.vincent_genecand.bfh.primethreading.version1.ControllerV1;
 
 final class Main {
 
-    private final ControlWindow window;
-    private final ControlPanel panel;
-    private final List<Prime> primes;
-    private final ThreadGroup threadGroup;
-
     private Main() {
-        this.panel = new ControlPanel();
-        this.window = new ControlWindow(this.panel);
-        this.primes = new ArrayList<>();
-        this.threadGroup = new ThreadGroup("Prime Generators");
-
-        this.initPrimes();
-        this.startPrimes();
-        this.initLamps();
-
-        while (true) {
-            this.panel.repaint();
-        }
-    }
-
-    private void initLamps() {
-        for (Prime prime : this.primes) {
-            this.panel.addLamp(prime);
-        }
-    }
-
-    private void initPrimes() {
-        for (int i = 0; i < 5; i++) {
-            this.primes.add(new Prime(this.threadGroup, "#" + i, 100));
-        }
-    }
-
-    private void startPrimes() {
-        for (Prime prime : this.primes) {
-            prime.start();
-        }
     }
 
     public static void main(String[] args) {
-        new Main();
+        if (args.length == 3) {
+            try {
+                int version = Integer.parseInt(args[0]);
+
+                switch (version) {
+                case 1:
+                    int threads = Integer.parseInt(args[1]);
+                    int limit = Integer.parseInt(args[2]);
+                    new ControllerV1(threads, limit);
+                    break;
+                case 2:
+                    System.out.println("Version 2 WIP!");
+                    break;
+                default:
+                    System.out.println("There is no version " + version + " planned!");
+                }
+
+            } catch (NumberFormatException e) {
+                System.err.println("Only numbers are allowed arguments!");
+            }
+
+        } else if (args.length == 0) {
+            System.out.println("Demo Mode:");
+            new ControllerV1(20, 20);
+        } else {
+            System.err.println("Wrong arguments! ===|> <version> <threads> <limit>");
+        }
     }
 }
