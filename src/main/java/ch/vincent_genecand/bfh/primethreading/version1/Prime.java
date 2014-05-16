@@ -7,6 +7,7 @@ public class Prime extends Thread {
 
     private final Stack<Long> primeNumbers;
     private final long limit;
+    private final Random rnd;
 
     private PrimeState primeState;
 
@@ -27,6 +28,7 @@ public class Prime extends Thread {
         this.primeNumbers = new Stack<>();
         this.limit = limit;
         this.primeState = PrimeState.STOPPED;
+        this.rnd = new Random(System.nanoTime());
     }
 
     public long getHighestPrimeNumber() {
@@ -34,23 +36,21 @@ public class Prime extends Thread {
     }
 
     private void calculatePrimeNumbers() {
-        for (long i = 2; i < this.limit && this.primeState != PrimeState.STOPPED; i++) {
+        for (long i = 2; i < this.limit && !this.isInterrupted(); i++) {
             if (this.isNextPrimeNumber(i)) {
                 this.primeNumbers.add(i);
             }
         }
-
         this.primeState = PrimeState.STOPPED;
     }
 
     private void sleep() {
         try {
             this.toggle();
-            Thread.sleep(new Random().nextInt(1001));
+            Thread.sleep(this.rnd.nextInt(1001));
             this.toggle();
         } catch (InterruptedException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            this.interrupt();
         }
     }
 
@@ -61,7 +61,7 @@ public class Prime extends Thread {
             break;
         case SLEEPING:
             this.primeState = PrimeState.RUNNING;
-            Thread.sleep(100);
+            Thread.sleep(80);
             break;
         default:
             break;
@@ -105,13 +105,7 @@ public class Prime extends Thread {
         return this.getName();
     }
 
-    @Override
-    public void interrupt() {
-        this.primeState = PrimeState.STOPPED;
-    }
-
     public PrimeState getPrimeState() {
         return this.primeState;
     }
-
 }
