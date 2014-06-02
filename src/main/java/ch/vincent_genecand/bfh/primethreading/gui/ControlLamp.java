@@ -5,7 +5,7 @@ import java.awt.Font;
 import java.awt.Graphics2D;
 import java.awt.geom.Rectangle2D;
 
-import ch.vincent_genecand.bfh.primethreading.version1.Prime;
+import ch.vincent_genecand.bfh.primethreading.prime.Prime;
 
 public class ControlLamp {
 

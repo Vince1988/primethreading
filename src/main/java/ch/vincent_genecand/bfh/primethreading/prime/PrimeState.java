@@ -1,9 +1,9 @@
-package ch.vincent_genecand.bfh.primethreading.version1;
+package ch.vincent_genecand.bfh.primethreading.prime;
 
 import java.awt.Color;
 
 public enum PrimeState {
-    RUNNING(Color.BLUE), SLEEPING(Color.ORANGE), STOPPED(Color.RED);
+    RUNNING(new Color(255, 200, 0)), SLEEPING(new Color(255, 255, 0, 75)), STOPPED(Color.RED), FOUND(Color.GREEN);
 
     private final Color color;
 

@@ -1,4 +1,4 @@
-package ch.vincent_genecand.bfh.primethreading.version1;
+package ch.vincent_genecand.bfh.primethreading.prime;
 
 import java.util.Random;
 import java.util.Stack;

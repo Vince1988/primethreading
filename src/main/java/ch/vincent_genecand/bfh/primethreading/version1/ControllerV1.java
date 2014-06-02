@@ -8,6 +8,7 @@ import java.util.Set;
 import ch.vincent_genecand.bfh.primethreading.gui.ControlLamp;
 import ch.vincent_genecand.bfh.primethreading.gui.ControlPanel;
 import ch.vincent_genecand.bfh.primethreading.gui.ControlWindow;
+import ch.vincent_genecand.bfh.primethreading.prime.Prime;
 
 public class ControllerV1 {
 
