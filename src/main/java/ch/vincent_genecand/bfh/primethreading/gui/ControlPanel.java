@@ -13,30 +13,27 @@ public class ControlPanel extends JPanel {
 
     private static final long serialVersionUID = 1L;
 
-    private final int radius;
-    private final int border;
+    private final int sideLength;
     private final int perRow;
 
     private final Set<ControlLamp> lamps;
     private final ControlLamp mainLamp;
 
     public ControlPanel(ControlLamp mainLamp, Set<ControlLamp> lamps) {
-        this.perRow = (int) Math.sqrt(lamps.size());
-        this.radius = (int) (Toolkit.getDefaultToolkit().getScreenSize().getHeight() / (this.perRow + 1)) / 2;
-        this.border = 0;
-        this.setLayout(null);
-        this.setPreferredSize(new Dimension((this.perRow + 1) * (this.radius * 2 + this.border) + this.border, (lamps.size() / this.perRow)
-                * (2 * this.radius + this.border) + this.border));
-        this.setOpaque(false);
-
         this.mainLamp = mainLamp;
         this.lamps = lamps;
 
+        this.perRow = (int) Math.sqrt(lamps.size());
+        this.sideLength = (int) Toolkit.getDefaultToolkit().getScreenSize().getHeight() / (this.perRow + 1);
+
+        this.setLayout(null);
+        this.setPreferredSize(new Dimension((this.perRow + 1) * this.sideLength, (lamps.size() / this.perRow) * this.sideLength));
+        this.setOpaque(false);
+
         int n = 0;
-        this.mainLamp.setBounds(this.border, this.border, this.radius);
+        this.mainLamp.setBounds(0, this.getPreferredSize().height / 2 - this.sideLength / 2, this.sideLength);
         for (ControlLamp lamp : this.lamps) {
-            lamp.setBounds(this.border + ((n % this.perRow + 1) * (2 * this.radius + this.border)), this.border + (n / this.perRow)
-                    * (2 * this.radius + this.border), this.radius);
+            lamp.setBounds((n % this.perRow + 1) * this.sideLength, (n / this.perRow) * this.sideLength, this.sideLength);
             n++;
         }
 

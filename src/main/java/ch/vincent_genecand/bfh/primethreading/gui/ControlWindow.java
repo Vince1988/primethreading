@@ -15,6 +15,7 @@ public class ControlWindow extends JFrame {
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         this.setResizable(false);
         this.setUndecorated(true);
+        // this.setBackground(Color.WHITE);
         this.setBackground(new Color(0, 0, 0, 0));
 
         this.setContentPane(controlPanel);

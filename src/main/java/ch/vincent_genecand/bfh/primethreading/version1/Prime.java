@@ -26,7 +26,7 @@ public class Prime extends Thread {
     public Prime(ThreadGroup threadGroup, String name, long limit) {
         super(threadGroup, name);
         this.primeNumbers = new Stack<>();
-        this.limit = limit;
+        this.limit = limit == 0 ? Long.MAX_VALUE : limit;
         this.primeState = PrimeState.STOPPED;
         this.rnd = new Random(System.nanoTime());
     }
@@ -37,9 +37,10 @@ public class Prime extends Thread {
 
     private void calculatePrimeNumbers() {
         for (long i = 2; i < this.limit && !this.isInterrupted(); i++) {
-            if (this.isNextPrimeNumber(i)) {
+            if (Prime.isPrimeNumber(i)) {
                 this.primeNumbers.add(i);
             }
+            this.sleep();
         }
         this.primeState = PrimeState.STOPPED;
     }
@@ -70,7 +71,7 @@ public class Prime extends Thread {
 
     private boolean isNextPrimeNumber(long number) {
         for (long primeNumber : this.primeNumbers) {
-            this.sleep();
+            // this.sleep();
             if (number % primeNumber == 0) {
                 return false;
             }

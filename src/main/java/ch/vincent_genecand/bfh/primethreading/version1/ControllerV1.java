@@ -16,11 +16,13 @@ public class ControllerV1 {
     private final Prime mainPrime;
     private final ThreadGroup threadGroup;
     private final int threads;
+    private final int limit;
 
     public ControllerV1(int threads, int limit) {
         this.threads = threads;
+        this.limit = limit;
         this.primes = new ArrayList<>();
-        this.mainPrime = new Prime("Main", limit);
+        this.mainPrime = new Prime("Main", this.limit);
         this.threadGroup = new ThreadGroup("Prime Generators");
 
         this.initPrimes();
