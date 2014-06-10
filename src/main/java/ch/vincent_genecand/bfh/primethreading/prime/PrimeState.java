@@ -3,7 +3,7 @@ package ch.vincent_genecand.bfh.primethreading.prime;
 import java.awt.Color;
 
 public enum PrimeState {
-    RUNNING(new Color(255, 200, 0)), SLEEPING(new Color(255, 255, 0, 75)), STOPPED(Color.RED), FOUND(Color.GREEN);
+    RUNNING(new Color(255, 200, 0)), SLEEPING(new Color(255, 255, 0, 75)), STOPPED(Color.RED);
 
     private final Color color;
 

@@ -1,46 +1,59 @@
 package ch.vincent_genecand.bfh.primethreading.prime;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.Random;
-import java.util.Stack;
+import java.util.Set;
+import java.util.TreeSet;
+import java.util.concurrent.Callable;
 
-public class Prime extends Thread {
+public class Prime extends Thread implements Callable<List<Long>> {
 
-    private final Stack<Long> primeNumbers;
-    private final long limit;
+    private final List<Long> primeNumbers;
+    private final boolean gui;
+    private final long upperLimit;
+    private final long lowerLimit;
     private final Random rnd;
 
     private PrimeState primeState;
 
-    public Prime(String name) {
-        this(name, Long.MAX_VALUE);
+    public Prime(ThreadGroup group, String name, boolean gui) {
+        this(group, name, 0, 0, gui, true);
     }
 
-    public Prime(String name, long limit) {
-        this(null, name, limit);
+    public Prime(String name, long upperLimit, boolean gui) {
+        this(null, name, 0, upperLimit, gui, true);
     }
 
-    public Prime(ThreadGroup threadGroup, String name) {
-        this(threadGroup, name, Long.MAX_VALUE);
+    public Prime(ThreadGroup group, String name, long lowerLimit, long upperLimit) {
+        this(group, name, lowerLimit, upperLimit, false, false);
     }
 
-    public Prime(ThreadGroup threadGroup, String name, long limit) {
+    public Prime(ThreadGroup threadGroup, String name, long lowerLimit, long upperLimit, boolean gui, boolean sleep) {
         super(threadGroup, name);
-        this.primeNumbers = new Stack<>();
-        this.limit = limit == 0 ? Long.MAX_VALUE : limit;
+
         this.primeState = PrimeState.STOPPED;
+        this.gui = gui;
+        this.lowerLimit = lowerLimit > 2 ? lowerLimit : 2;
+        this.upperLimit = upperLimit > 2 ? upperLimit : Long.MAX_VALUE;
+
+        this.primeNumbers = new ArrayList<>();
         this.rnd = new Random(System.nanoTime());
     }
 
     public long getHighestPrimeNumber() {
-        return this.primeNumbers.isEmpty() ? 0 : this.primeNumbers.lastElement();
+        return this.primeNumbers.isEmpty() ? 0 : this.primeNumbers.get(this.primeNumbers.size() - 1);
     }
 
     private void calculatePrimeNumbers() {
-        for (long i = 2; i < this.limit && !this.isInterrupted(); i++) {
+        this.primeState = PrimeState.RUNNING;
+        for (long i = this.lowerLimit; i < this.upperLimit && !this.isInterrupted(); i++) {
             if (Prime.isPrimeNumber(i)) {
                 this.primeNumbers.add(i);
+                this.sleep();
             }
-            this.sleep();
+
         }
         this.primeState = PrimeState.STOPPED;
     }
@@ -62,7 +75,9 @@ public class Prime extends Thread {
             break;
         case SLEEPING:
             this.primeState = PrimeState.RUNNING;
-            Thread.sleep(80);
+            if (this.gui) {
+                Thread.sleep(80);
+            }
             break;
         default:
             break;
@@ -71,7 +86,6 @@ public class Prime extends Thread {
 
     private boolean isNextPrimeNumber(long number) {
         for (long primeNumber : this.primeNumbers) {
-            // this.sleep();
             if (number % primeNumber == 0) {
                 return false;
             }
@@ -80,25 +94,37 @@ public class Prime extends Thread {
     }
 
     @Override
+    public List<Long> call() throws Exception {
+        this.calculatePrimeNumbers();
+        return this.primeNumbers;
+    }
+
+    @Override
     public void run() {
-        this.primeState = PrimeState.RUNNING;
         this.calculatePrimeNumbers();
     }
 
     public final static boolean isPrimeNumber(long number) {
-
         if (number < 2) {
             return false;
-        }
-
-        for (int i = 2; i < number; i++) {
-            if (number % i == 0) {
-                return false;
+        } else {
+            for (int i = 2; i < number; i++) {
+                if (number % i == 0) {
+                    return false;
+                }
             }
+            return true;
+        }
+    }
+
+    public final static Set<Long> combine(Prime... primes) {
+        Set<Long> primeNumbers = new TreeSet<>();
+
+        for (Prime prime : primes) {
+            primeNumbers.addAll(prime.primeNumbers);
         }
 
-        return true;
-
+        return Collections.unmodifiableSet(primeNumbers);
     }
 
     @Override
@@ -109,4 +135,5 @@ public class Prime extends Thread {
     public PrimeState getPrimeState() {
         return this.primeState;
     }
+
 }

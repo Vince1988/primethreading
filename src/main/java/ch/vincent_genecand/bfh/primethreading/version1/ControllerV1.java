@@ -19,14 +19,14 @@ public class ControllerV1 {
     private final int threads;
     private final int limit;
 
-    public ControllerV1(int threads, int limit) {
+    public ControllerV1(int threads, int limit, boolean gui) {
         this.threads = threads;
         this.limit = limit;
         this.primes = new ArrayList<>();
-        this.mainPrime = new Prime("Main", this.limit);
+        this.mainPrime = new Prime("Main", this.limit, gui);
         this.threadGroup = new ThreadGroup("Prime Generators");
 
-        this.initPrimes();
+        this.initPrimes(gui);
 
         this.panel = new ControlPanel(new ControlLamp(this.mainPrime), this.initLamps());
 
@@ -54,9 +54,9 @@ public class ControllerV1 {
         return lamps;
     }
 
-    private void initPrimes() {
+    private void initPrimes(boolean gui) {
         for (int i = 0; i < this.threads * this.threads; i++) {
-            this.primes.add(new Prime(this.threadGroup, "#" + i));
+            this.primes.add(new Prime(this.threadGroup, "#" + i, gui));
         }
     }
 
