@@ -112,10 +112,9 @@ public class Prime implements Callable<List<Long>> {
     }
 
     @Override
-    public List<Long> call() throws Exception {
-        System.out.println(this.name + " start");
+    public List<Long> call() {
         this.calculatePrimeNumbers();
-        System.out.println(this.name + " stop");
+
         return this.primeNumbers;
     }
 

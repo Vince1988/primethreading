@@ -16,14 +16,8 @@ public class ControllerV2 {
     private final int threads;
     private final long packetSize;
 
-    private final ExecutorService executorServiceSplit;
-    private final ExecutorService executorServiceSingle;
-
-    private final List<Future<List<Long>>> futurePrimes;
-    private Future<List<Long>> futurePrime;
-
-    private Prime singlePrime;
-    private List<Prime> splitPrimes;
+    private final List<Prime> singlePrime;
+    private final List<Prime> splitPrimes;
 
     private double singleTime;
     private double splitTime;
@@ -33,17 +27,14 @@ public class ControllerV2 {
         this.packetSize = packetSize;
         this.limit = this.threads * this.packetSize;
 
-        this.futurePrimes = new ArrayList<>();
+        this.singlePrime = new ArrayList<>();
         this.splitPrimes = new ArrayList<>();
-
-        executorServiceSplit = Executors.newFixedThreadPool(threads);
-        executorServiceSingle = Executors.newFixedThreadPool(1);
 
         this.initThreads();
 
         try {
-            singleTime = this.singlePrime();
-            splitTime = this.splitPrime();
+            this.singleTime = this.executePrimes(this.singlePrime);
+            this.splitTime = this.executePrimes(this.splitPrimes);
         } catch (InterruptedException | ExecutionException e) {
             e.printStackTrace();
         }
@@ -53,7 +44,7 @@ public class ControllerV2 {
 
     private void compare() {
         Set<Long> split = Prime.combine(this.splitPrimes.toArray(new Prime[this.splitPrimes.size()]));
-        Set<Long> single = Prime.combine(this.singlePrime);
+        Set<Long> single = Prime.combine(this.singlePrime.toArray(new Prime[this.singlePrime.size()]));
 
         System.out.println("==========");
         System.out.println("Compare:");
@@ -62,51 +53,33 @@ public class ControllerV2 {
         System.out.println("Split: " + split);
         System.out.println("Equal?: " + single.equals(split));
         System.out.println("Time difference:");
-        System.out.println("Single: " + singleTime + " s");
-        System.out.println("Split: " + (splitTime - singleTime) + " s");
+        System.out.println("Single: " + this.singleTime + " s");
+        System.out.println("Split: " + (this.splitTime - this.singleTime) + " s");
     }
 
-    private double singlePrime() throws InterruptedException, ExecutionException {
+    private double executePrimes(List<Prime> primes) throws InterruptedException, ExecutionException {
         System.out.println("==========");
-        System.out.println("Single:");
+        System.out.println("# " + primes.size() + " Threads:");
         System.out.println("==========");
 
         long start = System.nanoTime();
 
-        this.futurePrime = executorServiceSingle.submit(singlePrime);
-        System.out.println(this.futurePrime.get());
+        ExecutorService executorService = Executors.newFixedThreadPool(primes.size());
+        List<Future<List<Long>>> futurePrimes = executorService.invokeAll(primes);
 
-        long end = System.nanoTime();
-
-        executorServiceSingle.shutdownNow();
-
-        double time = (end - start) / 1000000000.0;
-        System.out.println("Time: " + time + " s");
-        System.out.println();
-
-        return time;
-    }
-
-    private double splitPrime() throws InterruptedException, ExecutionException {
-        System.out.println("==========");
-        System.out.println("Split:");
-        System.out.println("==========");
-
-        long start = System.nanoTime();
-
-        for (Prime p : this.splitPrimes) {
-            this.futurePrimes.add(executorServiceSplit.submit(p));
-        }
-
-        for (Future<List<Long>> p : this.futurePrimes) {
-            System.out.println(p.get());
+        executorService.shutdown();
+        while (executorService.isTerminated()) {
+            // wait until all is done
         }
 
         long end = System.nanoTime();
 
-        executorServiceSplit.shutdownNow();
-
         double time = (end - start) / 1000000000.0;
+
+        for (Future<List<Long>> futurePrime : futurePrimes) {
+            System.out.println(futurePrime.get());
+        }
+
         System.out.println("Time: " + time + " s");
         System.out.println();
 
@@ -114,7 +87,7 @@ public class ControllerV2 {
     }
 
     private void initThreads() {
-        this.singlePrime = new Prime("Single Prime", 0, this.limit);
+        this.singlePrime.add(new Prime("Single Prime", 0, this.limit));
 
         for (int i = 0; i < this.threads; i++) {
             this.splitPrimes.add(new Prime("Split Prime #" + (i + 1), i * this.packetSize, i * this.packetSize + this.packetSize));
