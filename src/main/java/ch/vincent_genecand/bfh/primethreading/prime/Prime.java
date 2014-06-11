@@ -8,33 +8,38 @@ import java.util.Set;
 import java.util.TreeSet;
 import java.util.concurrent.Callable;
 
-public class Prime extends Thread implements Callable<List<Long>> {
+public class Prime implements Callable<List<Long>> {
 
-    private final List<Long> primeNumbers;
-    private final boolean gui;
+    private final String name;
     private final long upperLimit;
     private final long lowerLimit;
+
+    private final List<Long> primeNumbers;
+
+    private final boolean gui;
+    private final boolean randomSleep;
+
     private final Random rnd;
 
     private PrimeState primeState;
 
-    public Prime(ThreadGroup group, String name, boolean gui) {
-        this(group, name, 0, 0, gui, true);
+    public Prime(String name, boolean gui) {
+        this(name, 0, 0, gui, true);
     }
 
     public Prime(String name, long upperLimit, boolean gui) {
-        this(null, name, 0, upperLimit, gui, true);
+        this(name, 0, upperLimit, gui, true);
     }
 
-    public Prime(ThreadGroup group, String name, long lowerLimit, long upperLimit) {
-        this(group, name, lowerLimit, upperLimit, false, false);
+    public Prime(String name, long lowerLimit, long upperLimit) {
+        this(name, lowerLimit, upperLimit, false, false);
     }
 
-    public Prime(ThreadGroup threadGroup, String name, long lowerLimit, long upperLimit, boolean gui, boolean sleep) {
-        super(threadGroup, name);
-
+    public Prime(String name, long lowerLimit, long upperLimit, boolean gui, boolean randomSleep) {
+        this.name = name;
         this.primeState = PrimeState.STOPPED;
         this.gui = gui;
+        this.randomSleep = randomSleep;
         this.lowerLimit = lowerLimit > 2 ? lowerLimit : 2;
         this.upperLimit = upperLimit > 2 ? upperLimit : Long.MAX_VALUE;
 
@@ -42,18 +47,12 @@ public class Prime extends Thread implements Callable<List<Long>> {
         this.rnd = new Random(System.nanoTime());
     }
 
-    public long getHighestPrimeNumber() {
-        return this.primeNumbers.isEmpty() ? 0 : this.primeNumbers.get(this.primeNumbers.size() - 1);
-    }
-
     private void calculatePrimeNumbers() {
         this.primeState = PrimeState.RUNNING;
-        for (long i = this.lowerLimit; i < this.upperLimit && !this.isInterrupted(); i++) {
-            if (Prime.isPrimeNumber(i)) {
+        for (long i = this.lowerLimit; i < this.upperLimit && !Thread.currentThread().isInterrupted(); i++) {
+            if (this.isPrimeNumber(i)) {
                 this.primeNumbers.add(i);
-                this.sleep();
             }
-
         }
         this.primeState = PrimeState.STOPPED;
     }
@@ -61,10 +60,14 @@ public class Prime extends Thread implements Callable<List<Long>> {
     private void sleep() {
         try {
             this.toggle();
-            Thread.sleep(this.rnd.nextInt(1001));
+            if (this.randomSleep) {
+                Thread.sleep(this.rnd.nextInt(1001));
+            } else {
+                Thread.sleep(1);
+            }
             this.toggle();
         } catch (InterruptedException e) {
-            this.interrupt();
+            Thread.currentThread().interrupt();
         }
     }
 
@@ -85,6 +88,7 @@ public class Prime extends Thread implements Callable<List<Long>> {
     }
 
     private boolean isNextPrimeNumber(long number) {
+        this.sleep();
         for (long primeNumber : this.primeNumbers) {
             if (number % primeNumber == 0) {
                 return false;
@@ -93,18 +97,8 @@ public class Prime extends Thread implements Callable<List<Long>> {
         return true;
     }
 
-    @Override
-    public List<Long> call() throws Exception {
-        this.calculatePrimeNumbers();
-        return this.primeNumbers;
-    }
-
-    @Override
-    public void run() {
-        this.calculatePrimeNumbers();
-    }
-
-    public final static boolean isPrimeNumber(long number) {
+    private boolean isPrimeNumber(long number) {
+        this.sleep();
         if (number < 2) {
             return false;
         } else {
@@ -117,6 +111,27 @@ public class Prime extends Thread implements Callable<List<Long>> {
         }
     }
 
+    @Override
+    public List<Long> call() throws Exception {
+        System.out.println(this.name + " start");
+        this.calculatePrimeNumbers();
+        System.out.println(this.name + " stop");
+        return this.primeNumbers;
+    }
+
+    @Override
+    public String toString() {
+        return this.name;
+    }
+
+    public long getHighestPrimeNumber() {
+        return this.primeNumbers.isEmpty() ? 0 : this.primeNumbers.get(this.primeNumbers.size() - 1);
+    }
+
+    public PrimeState getPrimeState() {
+        return this.primeState;
+    }
+
     public final static Set<Long> combine(Prime... primes) {
         Set<Long> primeNumbers = new TreeSet<>();
 
@@ -125,15 +140,6 @@ public class Prime extends Thread implements Callable<List<Long>> {
         }
 
         return Collections.unmodifiableSet(primeNumbers);
-    }
-
-    @Override
-    public String toString() {
-        return this.getName();
-    }
-
-    public PrimeState getPrimeState() {
-        return this.primeState;
     }
 
 }
